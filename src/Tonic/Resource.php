@@ -53,6 +53,7 @@ class Resource
             if ($key != 'setup') {
                 foreach ($methodMetadata->getConditions() as $conditionName => $conditionValues) {
                     if (method_exists($this, $conditionName)) {
+                        $this->currentMethodName = $key;
                         $success = false;
                         $error = null;
                         if (!$conditionValues) { // empty condition, process once for null value
