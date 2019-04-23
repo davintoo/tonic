@@ -53,7 +53,6 @@ class Resource
             foreach ($resourceMetadata['methods'] as $key => $methodMetadata) {
                 foreach ($methodMetadata as $conditionName => $conditions) { // process each method condition
                     if (method_exists($this, $conditionName)) {
-                        $this->currentMethodName = $key;
                         $success = false;
                         foreach ($conditions as $params) {
                             if (!isset($methodPriorities[$key]['value'])) {
@@ -144,6 +143,8 @@ class Resource
                     }
                 }
             }
+
+            $this->currentMethodName = $methodName;
             $response = Response::create(call_user_func_array(array($this, $methodName), $this->params));
             foreach (array('*', $methodName) as $mn) {
                 if (isset($this->after[$mn])) {
@@ -266,6 +267,11 @@ class Resource
                 $response->cacheControl = 'max-age='.$length.', must-revalidate';
             }
         });
+    }
+
+    public function getCurrentMethodName()
+    {
+        return $this->currentMethodName;
     }
 
     public function __toString()
