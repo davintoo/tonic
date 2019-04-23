@@ -53,7 +53,6 @@ class Resource
             if ($key != 'setup') {
                 foreach ($methodMetadata->getConditions() as $conditionName => $conditionValues) {
                     if (method_exists($this, $conditionName)) {
-                        $this->currentMethodName = $key;
                         $success = false;
                         $error = null;
                         if (!$conditionValues) { // empty condition, process once for null value
@@ -147,6 +146,7 @@ class Resource
                     }
                 }
             }
+            $this->currentMethodName = $methodName;
             $response = Response::create(call_user_func_array(array($this, $methodName), $this->params));
             foreach (array('*', $methodName) as $mn) {
                 if (isset($this->after[$mn])) {
@@ -291,6 +291,11 @@ class Resource
                 $response->cacheControl = 'max-age='.$length.', must-revalidate';
             }
         });
+    }
+    
+    public function getCurrentMethodName()
+    {
+        return $this->currentMethodName;
     }
 
     public function allowedMethods()
