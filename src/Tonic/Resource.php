@@ -10,6 +10,7 @@ class Resource
     protected $app, $request;
     public $params;
     private $currentMethodName = '*';
+    private $executedMethodName = '';
     protected $before = array(), $after = array();
 
     public function __construct(Application $app, Request $request)
@@ -147,7 +148,7 @@ class Resource
                     }
                 }
             }
-            $this->currentMethodName = $methodName;
+            $this->executedMethodName = $methodName;
             $response = Response::create(call_user_func_array(array($this, $methodName), $this->params));
             foreach (array('*', $methodName) as $mn) {
                 if (isset($this->after[$mn])) {
@@ -294,9 +295,9 @@ class Resource
         });
     }
     
-    public function getCurrentMethodName()
+    public function getExecutedMethodName()
     {
-        return $this->currentMethodName;
+        return $this->executedMethodName;
     }
 
     public function allowedMethods()
