@@ -10,6 +10,7 @@ class Resource
     protected $app, $request;
     public $params;
     private $currentMethodName = '*';
+    private $executedMethodName = '';
     protected $before = array(), $after = array();
 
     public function __construct(Application $app, Request $request)
@@ -53,6 +54,7 @@ class Resource
             foreach ($resourceMetadata['methods'] as $key => $methodMetadata) {
                 foreach ($methodMetadata as $conditionName => $conditions) { // process each method condition
                     if (method_exists($this, $conditionName)) {
+                        $this->currentMethodName = $key;
                         $success = false;
                         foreach ($conditions as $params) {
                             if (!isset($methodPriorities[$key]['value'])) {
@@ -144,7 +146,7 @@ class Resource
                 }
             }
 
-            $this->currentMethodName = $methodName;
+            $this->executedMethodName = $methodName;
             $response = Response::create(call_user_func_array(array($this, $methodName), $this->params));
             foreach (array('*', $methodName) as $mn) {
                 if (isset($this->after[$mn])) {
@@ -269,9 +271,9 @@ class Resource
         });
     }
 
-    public function getCurrentMethodName()
+    public function getExecutedMethodName()
     {
-        return $this->currentMethodName;
+        return $this->executedMethodName;
     }
 
     public function __toString()
