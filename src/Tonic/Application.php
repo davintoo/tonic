@@ -345,10 +345,13 @@ class Application
         $data = array();
         preg_match_all('/^\s*\*[*\s]*(@.+)$/m', $comment, $items);
         if ($items && isset($items[1])) {
+            $callback = function (&$v) {
+                $v = trim($v, '"');;
+            };
             foreach ($items[1] as $item) {
                 preg_match_all('/"[^"]+"|[^\s]+/', $item, $parts);
                 $key = array_shift($parts[0]);
-                array_walk($parts[0], create_function('&$v', '$v = trim($v, \'"\');'));
+                array_walk($parts[0], $callback);
                 $data[$key][] = $parts[0];
             }
         }
