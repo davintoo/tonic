@@ -22,7 +22,7 @@ class Resource
 
     /**
      * Get a URL parameter as defined by this resource and it's URI
-     * @param  str $name Name of the parameter
+     * @param str $name Name of the parameter
      * @return str
      */
     public function __get($name)
@@ -32,7 +32,7 @@ class Resource
 
     /**
      * Check if a URL parameter exists
-     * @param  str $name Name of the parameter
+     * @param str $name Name of the parameter
      * @return str
      */
     public function __isset($name)
@@ -43,7 +43,7 @@ class Resource
     /**
      * Get the method name of the best matching resource method.
      *
-     * @param  str[] $resourceMetadata
+     * @param str[] $resourceMetadata
      * @return str
      */
     private function calculateMethodPriorities($resourceMetadata)
@@ -105,7 +105,9 @@ class Resource
      * Condition annotations applied to the setup() method will be applied to all
      * resource methods within the class.
      */
-    protected function setup() {}
+    protected function setup()
+    {
+    }
 
     /**
      * Execute the resource, that is, find the correct resource method to call
@@ -213,7 +215,7 @@ class Resource
     protected function method($method)
     {
         if (strtolower($this->request->getMethod()) != strtolower($method)) {
-            throw new MethodNotAllowedException('No matching method for HTTP method "'.$this->request->getMethod().'"');
+            throw new MethodNotAllowedException(\Tonic\Exception::escapeOutput('No matching method for HTTP method "' . $this->request->getMethod() . '"'));
         }
         return true;
     }
@@ -234,7 +236,7 @@ class Resource
     protected function accepts($mimetype)
     {
         if (strtolower($this->request->getContentType()) != strtolower($mimetype)) {
-            throw new UnsupportedMediaTypeException('No matching method for content type "'.$this->request->getContentType().'"');
+            throw new UnsupportedMediaTypeException(\Tonic\Exception::escapeOutput('No matching method for content type "' . $this->request->getContentType() . '"'));
         }
 
         return true;
@@ -243,7 +245,7 @@ class Resource
     /**
      * Provides condition mimetype must be in request accept array, returns a number
      * based on the priority of the match.
-     * @param  str $mimetype
+     * @param str $mimetype
      * @return int
      */
     protected function provides($mimetype)
@@ -254,7 +256,7 @@ class Resource
             if (in_array('*/*', $this->request->getAccept())) {
                 return 0;
             } else {
-                throw new NotAcceptableException('No matching method for response type "'.join(', ', $this->request->getAccept()).'"');
+                throw new NotAcceptableException(\Tonic\Exception::escapeOutput('No matching method for response type "' . join(', ', $this->request->getAccept()) . '"'));
             }
         } else {
             $this->after(function ($response) use ($mimetype) {
@@ -268,14 +270,14 @@ class Resource
     /**
      * Lang condition language code must be in request accept lang array, returns a number
      * based on the priority of the match.
-     * @param  str $language
+     * @param str $language
      * @return int
      */
     protected function lang($language)
     {
         $pos = array_search($language, $this->request->getAcceptLanguage());
         if ($pos === FALSE) {
-            throw new NotAcceptableException('No matching method for response type "'.join(', ', $this->request->getAcceptLanguage()).'"');
+            throw new NotAcceptableException(\Tonic\Exception::escapeOutput('No matching method for response type "' . join(', ', $this->request->getAcceptLanguage()) . '"'));
         }
         return count($this->request->getAcceptLanguage()) - $pos;
     }
@@ -290,11 +292,11 @@ class Resource
             if ($length == 0) {
                 $response->cacheControl = 'no-cache';
             } else {
-                $response->cacheControl = 'max-age='.$length.', must-revalidate';
+                $response->cacheControl = 'max-age=' . $length . ', must-revalidate';
             }
         });
     }
-    
+
     public function getExecutedMethodName()
     {
         return $this->executedMethodName;
@@ -317,7 +319,7 @@ class Resource
         $params = array();
         if (is_array($this->params)) {
             foreach ($this->params as $name => $value) {
-                $params[] = $name.' = "'.$value.'"';
+                $params[] = $name . ' = "' . $value . '"';
             }
         }
         $params = join(', ', $params);
@@ -331,28 +333,29 @@ class Resource
 
         try {
             $priorities = $this->calculateMethodPriorities($metadata);
-        } catch (Exception $e) {}
+        } catch (Exception $e) {
+        }
         $methods = '';
         foreach ($metadata->getMethods() as $methodName => $method) {
             if ($methodName != 'setup') {
-                $methods .= "\n\t".'[';
+                $methods .= "\n\t" . '[';
                 if (isset($priorities[$methodName])) {
                     if (isset($priorities[$methodName]['exception'])) {
-                        $methods .= get_class($priorities[$methodName]['exception']).' ';
+                        $methods .= get_class($priorities[$methodName]['exception']) . ' ';
                     }
                     $methods .= $priorities[$methodName]['value'];
                 } else {
                     $methods .= '-';
                 }
-                $methods .= '] '.$methodName;
+                $methods .= '] ' . $methodName;
                 if ($metadata->getMethod('setup')) {
                     $method += $metadata->getMethod('setup');
                 }
                 foreach ($method as $itemName => $items) {
                     foreach ($items as $item) {
-                        $methods .= ' '.$itemName;
+                        $methods .= ' ' . $itemName;
                         if ($item) {
-                            $methods .= '="'.join(', ', $item).'"';
+                            $methods .= '="' . join(', ', $item) . '"';
                         }
                     }
                 }
