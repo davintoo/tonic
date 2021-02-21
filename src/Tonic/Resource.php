@@ -191,7 +191,7 @@ class Resource
     protected function method($method)
     {
         if (strtolower($this->request->method) != strtolower($method))
-            throw new MethodNotAllowedException('No matching method for HTTP method "'.$this->request->method.'"');
+            throw new MethodNotAllowedException(\Tonic\Exception::escapeOutput('No matching method for HTTP method "'.$this->request->method.'"'));
         return true;
     }
 
@@ -211,7 +211,7 @@ class Resource
     protected function accepts($mimetype)
     {
         if (strtolower($this->request->contentType) != strtolower($mimetype)) {
-            throw new UnsupportedMediaTypeException('No matching method for content type "'.$this->request->contentType.'"');
+            throw new UnsupportedMediaTypeException(\Tonic\Exception::escapeOutput('No matching method for content type "'.$this->request->contentType.'"'));
         }
         return true;
     }
@@ -230,7 +230,7 @@ class Resource
             if (in_array('*/*', $this->request->accept)) {
                 return 0;
             } else {
-                throw new NotAcceptableException('No matching method for response type "'.join(', ', $this->request->accept).'"');
+                throw new NotAcceptableException(\Tonic\Exception::escapeOutput('No matching method for response type "'.join(', ', $this->request->accept).'"'));
             }
         } else {
             $this->after(function ($response) use ($mimetype) {
@@ -251,7 +251,7 @@ class Resource
     {
         $pos = array_search($language, $this->request->acceptLanguage);
         if ($pos === FALSE)
-            throw new NotAcceptableException('No matching method for response type "'.join(', ', $this->request->acceptLanguage).'"');
+            throw new NotAcceptableException(\Tonic\Exception::escapeOutput('No matching method for response type "'.join(', ', $this->request->acceptLanguage).'"'));
 
         return count($this->request->acceptLanguage) - $pos;
     }
